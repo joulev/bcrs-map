@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Noto Sans";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("../node_modules/@fontsource-variable/noto-sans/files/noto-sans-latin-wght-normal.woff2");
+}
+
+@theme {
+  --font-sans: "Noto Sans";
+}
+
+html,
+html .maplibregl-map {
+  font-family: var(--font-sans);
+}
+
+html {
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  html .maplibregl-ctrl-group {
+    background: #262626;
+  }
+
+  html .maplibregl-ctrl-group:not(:empty) {
+    box-shadow: 0 0 0 2px rgb(255 255 255 / 12%);
+  }
+
+  html .maplibregl-ctrl-group button + button {
+    border-color: #404040;
+  }
+
+  html .maplibregl-ctrl-group button:not(:disabled):hover,
+  html .maplibregl-ctrl-group button:not(:disabled):active {
+    background-color: rgb(255 255 255 / 8%);
+  }
+
+  html
+    .maplibregl-ctrl
+    button:not(.maplibregl-ctrl-geolocate-active)
+    .maplibregl-ctrl-icon,
+  html .maplibregl-ctrl-attrib-button {
+    filter: invert(1);
+  }
+
+  html .maplibregl-ctrl.maplibregl-ctrl-attrib,
+  html .maplibregl-ctrl-attrib.maplibregl-compact {
+    background-color: rgb(23 23 23 / 85%);
+    color: #d4d4d4;
+  }
+
+  html .maplibregl-ctrl-attrib a {
+    color: inherit;
+  }
+}
