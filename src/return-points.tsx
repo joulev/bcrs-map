@@ -260,8 +260,8 @@ export function ReturnPointsLegend() {
   const query = useReturnPoints();
   const [isDisplayed, setIsDisplayed] = useState(false);
 
-  if (!isDisplayed)
-    return (
+  return (
+    <>
       <button
         className="sm:hidden absolute top-3 right-3 font-medium rounded-2xl flex flex-row items-center gap-2 px-3 py-2 text-xs border border-neutral-200 bg-neutral-50 shadow-md dark:bg-neutral-900 dark:shadow-black/40 dark:border-neutral-800 active:scale-95"
         onClick={() => setIsDisplayed(true)}
@@ -269,48 +269,48 @@ export function ReturnPointsLegend() {
         <InfoIcon className="size-4" />
         View legend
       </button>
-    );
-
-  return (
-    <header className="absolute max-sm:top-3 max-sm:inset-x-3 sm:bottom-3 sm:left-3 sm:w-72 z-10 flex flex-col gap-4 rounded-2xl border border-neutral-200 bg-neutral-50 p-4 text-sm shadow-lg dark:bg-neutral-900 dark:shadow-black/40 dark:border-neutral-800">
-      {query.isError ? (
-        <div className="flex flex-col gap-3 text-center">
-          <p>Could not get locations from BCRS</p>
-          <button className="rounded-lg font-medium bg-lime-700 px-3 py-1 text-white hover:bg-lime-800 active:scale-98 dark:bg-lime-600 dark:hover:bg-lime-500">
-            Try again
-          </button>
+      <header
+        className={`absolute max-sm:top-3 max-sm:inset-x-3 sm:bottom-3 sm:left-3 sm:w-72 z-10 flex flex-col gap-4 rounded-2xl border border-neutral-200 bg-neutral-50 p-4 text-sm shadow-lg dark:bg-neutral-900 dark:shadow-black/40 dark:border-neutral-800 ${isDisplayed ? "" : "max-sm:hidden"}`}
+      >
+        {query.isError ? (
+          <div className="flex flex-col gap-3 text-center">
+            <p>Could not get locations from BCRS</p>
+            <button className="rounded-lg font-medium bg-lime-700 px-3 py-1 text-white hover:bg-lime-800 active:scale-98 dark:bg-lime-600 dark:hover:bg-lime-500">
+              Try again
+            </button>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2 relative">
+            <LegendRow colourClass="bg-lime-700">
+              BCRS Return Points
+              {query.isLoading ? (
+                <LoaderIcon className="mb-0.5 ml-2 inline size-4 animate-spin text-neutral-500 dark:text-neutral-400" />
+              ) : null}
+              {query.isSuccess ? (
+                <span className="ml-1 text-xs text-neutral-500 dark:text-neutral-400">
+                  ({query.data.features.length.toLocaleString()})
+                </span>
+              ) : null}
+            </LegendRow>
+            <LegendRow colourClass="bg-neutral-400">
+              Inactive Return Points
+            </LegendRow>
+            <button
+              className="absolute top-0 right-0 text-xs text-neutral-500 dark:text-neutral-400 sm:hidden active:scale-95"
+              onClick={() => setIsDisplayed(false)}
+            >
+              <XIcon className="size-5" aria-label="Close legend" />
+            </button>
+          </div>
+        )}
+        <div className="text-xs text-neutral-500 dark:text-neutral-400 [&_a]:underline">
+          Data from <a href="https://returnright.sg">BCRS</a>. MRT data from{" "}
+          <a href="https://github.com/cheeaun/sgraildata">cheeaun</a>.
+          <br />
+          Built with GPT 5.6-Sol by{" "}
+          <a href="https://github.com/joulev/bcrs-map">joulev</a>.
         </div>
-      ) : (
-        <div className="flex flex-col gap-2 relative">
-          <LegendRow colourClass="bg-lime-700">
-            BCRS Return Points
-            {query.isLoading ? (
-              <LoaderIcon className="mb-0.5 ml-2 inline size-4 animate-spin text-neutral-500 dark:text-neutral-400" />
-            ) : null}
-            {query.isSuccess ? (
-              <span className="ml-1 text-xs text-neutral-500 dark:text-neutral-400">
-                ({query.data.features.length.toLocaleString()})
-              </span>
-            ) : null}
-          </LegendRow>
-          <LegendRow colourClass="bg-neutral-400">
-            Inactive Return Points
-          </LegendRow>
-          <button
-            className="absolute top-0 right-0 text-xs text-neutral-500 dark:text-neutral-400 sm:hidden active:scale-95"
-            onClick={() => setIsDisplayed(false)}
-          >
-            <XIcon className="size-5" aria-label="Close legend" />
-          </button>
-        </div>
-      )}
-      <div className="text-xs text-neutral-500 dark:text-neutral-400 [&_a]:underline">
-        Data from <a href="https://returnright.sg">BCRS</a>. MRT data from{" "}
-        <a href="https://github.com/cheeaun/sgraildata">cheeaun</a>.
-        <br />
-        Built with GPT 5.6-Sol by{" "}
-        <a href="https://github.com/joulev/bcrs-map">joulev</a>.
-      </div>
-    </header>
+      </header>
+    </>
   );
 }
