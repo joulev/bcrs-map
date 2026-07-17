@@ -258,7 +258,7 @@ function LegendRow({
 
 export function ReturnPointsLegend() {
   const query = useReturnPoints();
-  const [isDisplayed, setIsDisplayed] = useState(true);
+  const [isDisplayed, setIsDisplayed] = useState(false);
 
   if (!isDisplayed)
     return (
