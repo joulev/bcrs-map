@@ -208,14 +208,16 @@ function LoaderIcon({ className }: { className?: string }) {
 }
 
 function LegendRow({
+  className,
   colourClass,
   children,
 }: {
+  className?: string;
   colourClass: string;
   children: ReactNode;
 }) {
   return (
-    <div className="flex flex-row items-center gap-3">
+    <div className={`flex flex-row items-center gap-3 ${className}`}>
       <div className={`size-4 rounded-full ${colourClass}`} />
       <div>{children}</div>
     </div>
@@ -225,7 +227,7 @@ function LegendRow({
 export function ReturnPointsLegend() {
   const query = useReturnPoints();
   return (
-    <header className="absolute bottom-3 left-3 z-10 flex w-72 flex-col gap-4 rounded-2xl border border-neutral-200 bg-neutral-50 p-4 text-sm shadow-lg dark:bg-neutral-900 dark:shadow-black/40 dark:border-neutral-800">
+    <header className="absolute max-sm:top-3 max-sm:inset-x-3 sm:bottom-3 sm:left-3 sm:w-72 z-10 flex flex-col gap-4 rounded-2xl border border-neutral-200 bg-neutral-50 p-4 text-sm shadow-lg dark:bg-neutral-900 dark:shadow-black/40 dark:border-neutral-800">
       {query.isError ? (
         <div className="flex flex-col gap-3 text-center">
           <p>Could not get locations from BCRS</p>
@@ -246,15 +248,17 @@ export function ReturnPointsLegend() {
               </span>
             ) : null}
           </LegendRow>
-          <LegendRow colourClass="bg-neutral-400">
+          <LegendRow className="max-sm:hidden" colourClass="bg-neutral-400">
             Inactive Return Points
           </LegendRow>
         </div>
       )}
       <div className="text-xs text-neutral-500 dark:text-neutral-400 [&_a]:underline">
         Data from <a href="https://returnright.sg">BCRS</a>. MRT data from{" "}
-        <a href="https://github.com/cheeaun/sgraildata">cheeaun</a>. Built with
-        GPT 5.6-Sol by <a href="https://github.com/joulev/bcrs-map">joulev</a>.
+        <a href="https://github.com/cheeaun/sgraildata">cheeaun</a>.
+        <br />
+        Built with GPT 5.6-Sol by{" "}
+        <a href="https://github.com/joulev/bcrs-map">joulev</a>.
       </div>
     </header>
   );
