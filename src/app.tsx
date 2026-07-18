@@ -49,7 +49,6 @@ function useSystemDarkMode() {
 
 export function App() {
   const isDarkMode = useSystemDarkMode();
-  const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
   const [selectedLocation, setSelectedLocation] =
     useState<SelectedLocation | null>(null);
   const [isHoveringLocation, setIsHoveringLocation] = useState(false);
@@ -74,8 +73,7 @@ export function App() {
   return (
     <main className="relative h-full w-full bg-neutral-200 text-neutral-700 dark:bg-neutral-950 dark:text-neutral-200">
       <Map
-        {...viewState}
-        onMove={(event) => setViewState(event.viewState)}
+        initialViewState={INITIAL_VIEW_STATE}
         mapStyle={`https://tiles.openfreemap.org/styles/${isDarkMode ? "dark" : "positron"}`}
         minZoom={9}
         maxZoom={19}
@@ -86,7 +84,7 @@ export function App() {
         onClick={selectLocation}
         reuseMaps
       >
-        <MrtMap darkMode={isDarkMode} zoom={viewState.zoom} />
+        <MrtMap darkMode={isDarkMode} />
 
         <ReturnPointsLayer darkMode={isDarkMode} />
 

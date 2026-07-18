@@ -10,6 +10,11 @@ declare module "*.svg" {
 
 declare module "*.css" {}
 
+declare module "*.woff2" {
+  const path: string;
+  export default path;
+}
+
 declare module "*.module.css" {
   /**
    * A record of class names to their corresponding CSS module classes
