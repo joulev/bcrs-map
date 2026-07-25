@@ -12,6 +12,7 @@ import { MrtMap } from "./mrt-map";
 import {
   INTERACTIVE_LAYERS,
   LocationPopup,
+  MOBILE_INTERACTIVE_LAYERS,
   ReturnPointsLegend,
   type ReturnPointProperties,
   type SelectedLocation,
@@ -28,6 +29,7 @@ const INITIAL_VIEW_STATE: ViewState = {
 };
 
 const DARK_MODE_QUERY = "(prefers-color-scheme: dark)";
+const COARSE_POINTER_QUERY = "(pointer: coarse)";
 
 function subscribeToSystemDarkMode(onChange: () => void) {
   const mediaQuery = window.matchMedia(DARK_MODE_QUERY);
@@ -47,8 +49,27 @@ function useSystemDarkMode() {
   );
 }
 
+function subscribeToCoarsePointer(onChange: () => void) {
+  const mediaQuery = window.matchMedia(COARSE_POINTER_QUERY);
+  mediaQuery.addEventListener("change", onChange);
+  return () => mediaQuery.removeEventListener("change", onChange);
+}
+
+function getHasCoarsePointer() {
+  return window.matchMedia(COARSE_POINTER_QUERY).matches;
+}
+
+function useHasCoarsePointer() {
+  return useSyncExternalStore(
+    subscribeToCoarsePointer,
+    getHasCoarsePointer,
+    () => false,
+  );
+}
+
 export function App() {
   const isDarkMode = useSystemDarkMode();
+  const hasCoarsePointer = useHasCoarsePointer();
   const [selectedLocation, setSelectedLocation] =
     useState<SelectedLocation | null>(null);
   const [isHoveringLocation, setIsHoveringLocation] = useState(false);
@@ -77,7 +98,9 @@ export function App() {
         mapStyle={`https://tiles.openfreemap.org/styles/${isDarkMode ? "dark" : "positron"}`}
         minZoom={9}
         maxZoom={19}
-        interactiveLayerIds={INTERACTIVE_LAYERS}
+        interactiveLayerIds={
+          hasCoarsePointer ? MOBILE_INTERACTIVE_LAYERS : INTERACTIVE_LAYERS
+        }
         cursor={isHoveringLocation ? "pointer" : "grab"}
         onMouseEnter={() => setIsHoveringLocation(true)}
         onMouseLeave={() => setIsHoveringLocation(false)}
@@ -86,7 +109,10 @@ export function App() {
       >
         <MrtMap darkMode={isDarkMode} />
 
-        <ReturnPointsLayer darkMode={isDarkMode} />
+        <ReturnPointsLayer
+          darkMode={isDarkMode}
+          useLargeHitArea={hasCoarsePointer}
+        />
 
         {selectedLocation && (
           <LocationPopup

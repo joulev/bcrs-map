@@ -56,7 +56,19 @@ export const LOCATION_LAYER: CircleLayerSpecification = {
   },
 };
 
+const LOCATION_HIT_AREA_LAYER: CircleLayerSpecification = {
+  id: "location-hit-areas",
+  type: "circle",
+  source: "locations",
+  paint: {
+    "circle-color": "#000000",
+    "circle-opacity": 0,
+    "circle-radius": 20,
+  },
+};
+
 export const INTERACTIVE_LAYERS = [LOCATION_LAYER.id];
+export const MOBILE_INTERACTIVE_LAYERS = [LOCATION_HIT_AREA_LAYER.id];
 
 export function useReturnPoints() {
   const query = useQuery({
@@ -127,7 +139,13 @@ export function useReturnPoints() {
   };
 }
 
-export function ReturnPointsLayer({ darkMode }: { darkMode: boolean }) {
+export function ReturnPointsLayer({
+  darkMode,
+  useLargeHitArea,
+}: {
+  darkMode: boolean;
+  useLargeHitArea: boolean;
+}) {
   const returnPointsQuery = useReturnPoints();
   return (
     <Source id="locations" type="geojson" data={returnPointsQuery.data}>
@@ -138,6 +156,7 @@ export function ReturnPointsLayer({ darkMode }: { darkMode: boolean }) {
           "circle-stroke-color": darkMode ? "#000000" : "#ffffff",
         }}
       />
+      {useLargeHitArea ? <Layer {...LOCATION_HIT_AREA_LAYER} /> : null}
     </Source>
   );
 }
