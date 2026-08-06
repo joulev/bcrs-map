@@ -124,11 +124,10 @@ export function App() {
         <GeolocateControl
           position="bottom-right"
           positionOptions={{
-            enableHighAccuracy: false,
+            enableHighAccuracy: true,
             timeout: 30_000,
-            maximumAge: 30_000,
           }}
-          trackUserLocation={false}
+          trackUserLocation
         />
         <NavigationControl position="bottom-right" showCompass={false} />
       </Map>
