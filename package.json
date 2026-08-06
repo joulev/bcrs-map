@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "bun --hot src/index.ts",
     "start": "NODE_ENV=production bun src/index.ts",
-    "build": "bun run build.ts"
+    "build": "bun run build.ts",
+    "generate:mrt-badge-glyphs": "bun run scripts/generate-mrt-station-code-glyphs.ts"
   },
   "dependencies": {
     "@fontsource-variable/noto-sans": "^5.2.10",
@@ -17,10 +18,13 @@
     "react-map-gl": "^8.1.1"
   },
   "devDependencies": {
+    "@fontsource/noto-sans": "5.2.10",
     "@types/bun": "latest",
+    "@types/fontkit": "2.0.9",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "bun-plugin-tailwind": "^0.1.2",
+    "fontkit": "2.0.4",
     "tailwindcss": "^4.3.2"
   }
 }

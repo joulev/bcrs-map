@@ -11,15 +11,11 @@ import type {
   MapStyleImageMissingEvent,
   SymbolLayerSpecification,
 } from "maplibre-gl";
-import { useEffect } from "react";
-import { renderToStaticMarkup } from "react-dom/server.browser";
+import { useLayoutEffect, useState } from "react";
 import { Layer, Source, useMap } from "react-map-gl/maplibre";
-import notoSansFontUrl from "../node_modules/@fontsource-variable/noto-sans/files/noto-sans-latin-wght-normal.woff2";
 import mrtData from "./data/sg-rail.geo.json";
-import {
-  getMrtBadgeBackgroundForPrefix,
-  MrtStationBadgeImage,
-} from "./mrt-station-badge";
+import { getMrtBadgeBackgroundForPrefix } from "./mrt-badge-colours";
+import { renderMrtStationBadge } from "./mrt-station-badge-renderer";
 
 type MrtLineProperties = {
   name: string;
@@ -55,10 +51,6 @@ const rawMrtStations = rawMrtData.features.filter(
 const MRT_BADGE_IMAGE_PREFIX = "mrt-station-badge:";
 const MRT_BADGE_HEIGHT = 54;
 
-function getMrtBadgeFontStyle(fontDataUrl: string) {
-  return `<style>@font-face{font-family:"Noto Sans";font-style:normal;font-weight:100 900;src:url("${fontDataUrl}") format("woff2")}text{font-family:"Noto Sans",sans-serif}</style>`;
-}
-
 function getMrtBadgeImageId(badgeCode: string) {
   return `${MRT_BADGE_IMAGE_PREFIX}${badgeCode}`;
 }
@@ -76,6 +68,9 @@ const MRT_STATIONS: FeatureCollection<Point, MrtStationProperties> = {
     },
   })),
 };
+const MRT_STATION_BADGE_CODES = new Set(
+  MRT_STATIONS.features.map((feature) => feature.properties.station_codes),
+);
 
 const MRT_LINES: FeatureCollection<
   LineString | MultiLineString,
@@ -178,94 +173,46 @@ const MRT_STATION_NAMES: SymbolLayerSpecification = {
   },
 };
 
-const badgeImages = new Map<string, Promise<HTMLImageElement>>();
-let notoSansFontDataUrl: Promise<string> | undefined;
+const badgeImages = new Map<string, ImageData>();
 
-function loadNotoSansFontDataUrl() {
-  notoSansFontDataUrl ??= fetch(notoSansFontUrl)
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error(`Failed to load Noto Sans (${response.status})`);
-      }
-      return response.blob();
-    })
-    .then(
-      (font) =>
-        new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(String(reader.result));
-          reader.onerror = () => reject(reader.error);
-          reader.readAsDataURL(font);
-        }),
-    );
-
-  return notoSansFontDataUrl;
-}
-
-function loadMrtBadgeImage(badgeCode: string) {
-  const existingImage = badgeImages.get(badgeCode);
-  if (existingImage) return existingImage;
-
-  const imagePromise = loadNotoSansFontDataUrl().then(
-    (fontDataUrl) =>
-      new Promise<HTMLImageElement>((resolve, reject) => {
-        const image = new Image();
-        const svg = renderToStaticMarkup(
-          <MrtStationBadgeImage badgeCode={badgeCode} />,
-        )
-          .replace("<svg", '<svg xmlns="http://www.w3.org/2000/svg"')
-          .replace(">", `>${getMrtBadgeFontStyle(fontDataUrl)}`);
-        image.onload = () => resolve(image);
-        image.onerror = () =>
-          reject(new Error(`Failed to render MRT badge ${badgeCode}`));
-        image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
-      }),
-  );
-
-  badgeImages.set(badgeCode, imagePromise);
-  return imagePromise;
-}
-
-function MrtBadgeImages() {
+function useMrtBadgeImages() {
   const { current: mapRef } = useMap();
+  const [loaderReady, setLoaderReady] = useState(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const map = mapRef?.getMap();
-    if (!map) return;
-
-    let cancelled = false;
-    const pendingImageIds = new Set<string>();
+    if (!map) {
+      setLoaderReady(false);
+      return;
+    }
 
     const addMissingBadgeImage = (event: MapStyleImageMissingEvent) => {
       if (!event.id.startsWith(MRT_BADGE_IMAGE_PREFIX)) return;
-      if (map.hasImage(event.id) || pendingImageIds.has(event.id)) return;
 
       const badgeCode = event.id.slice(MRT_BADGE_IMAGE_PREFIX.length);
-      pendingImageIds.add(event.id);
-      void loadMrtBadgeImage(badgeCode)
-        .then((image) => {
-          if (!cancelled && !map.hasImage(event.id)) {
-            map.addImage(event.id, image);
-          }
-        })
-        .catch((error: unknown) => console.error(error))
-        .finally(() => pendingImageIds.delete(event.id));
+      if (!MRT_STATION_BADGE_CODES.has(badgeCode)) return;
+
+      const image =
+        badgeImages.get(badgeCode) ?? renderMrtStationBadge(badgeCode);
+      badgeImages.set(badgeCode, image);
+      if (!map.hasImage(event.id)) map.addImage(event.id, image);
     };
 
     map.on("styleimagemissing", addMissingBadgeImage);
+    setLoaderReady(true);
     return () => {
-      cancelled = true;
       map.off("styleimagemissing", addMissingBadgeImage);
     };
   }, [mapRef]);
 
-  return null;
+  return loaderReady;
 }
 
 export function MrtMap({ darkMode }: { darkMode: boolean }) {
+  const badgeImagesReady = useMrtBadgeImages();
+
   return (
     <>
-      <MrtBadgeImages />
       <Source id="mrt-lines" type="geojson" data={MRT_LINES}>
         <Layer
           {...MRT_LINE_CASING}
@@ -284,7 +231,7 @@ export function MrtMap({ darkMode }: { darkMode: boolean }) {
             "circle-stroke-color": darkMode ? "#171717" : "#ffffff",
           }}
         />
-        <Layer {...MRT_STATION_BADGES} />
+        {badgeImagesReady ? <Layer {...MRT_STATION_BADGES} /> : null}
         <Layer
           {...MRT_STATION_NAMES}
           paint={{
