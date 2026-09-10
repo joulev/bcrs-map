@@ -156,7 +156,9 @@ export function ReturnPointsLayer({
           "circle-stroke-color": darkMode ? "#000000" : "#ffffff",
         }}
       />
-      {useLargeHitArea ? <Layer {...LOCATION_HIT_AREA_LAYER} /> : null}
+      {useLargeHitArea ? (
+        <Layer {...LOCATION_HIT_AREA_LAYER} beforeId={LOCATION_LAYER.id} />
+      ) : null}
     </Source>
   );
 }

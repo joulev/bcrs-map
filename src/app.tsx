@@ -11,6 +11,7 @@ import "./index.css";
 import { MrtMap } from "./mrt-map";
 import {
   INTERACTIVE_LAYERS,
+  LOCATION_LAYER,
   LocationPopup,
   MOBILE_INTERACTIVE_LAYERS,
   ReturnPointsLegend,
@@ -107,12 +108,12 @@ export function App() {
         onClick={selectLocation}
         reuseMaps
       >
-        <MrtMap darkMode={isDarkMode} />
-
         <ReturnPointsLayer
           darkMode={isDarkMode}
           useLargeHitArea={hasCoarsePointer}
         />
+
+        <MrtMap darkMode={isDarkMode} beforeId={LOCATION_LAYER.id} />
 
         {selectedLocation && (
           <LocationPopup

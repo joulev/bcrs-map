@@ -208,7 +208,13 @@ function useMrtBadgeImages() {
   return loaderReady;
 }
 
-export function MrtMap({ darkMode }: { darkMode: boolean }) {
+export function MrtMap({
+  darkMode,
+  beforeId,
+}: {
+  darkMode: boolean;
+  beforeId: string;
+}) {
   const badgeImagesReady = useMrtBadgeImages();
 
   return (
@@ -216,24 +222,29 @@ export function MrtMap({ darkMode }: { darkMode: boolean }) {
       <Source id="mrt-lines" type="geojson" data={MRT_LINES}>
         <Layer
           {...MRT_LINE_CASING}
+          beforeId={beforeId}
           paint={{
             ...MRT_LINE_CASING.paint,
             "line-color": darkMode ? "#171717" : "#ffffff",
           }}
         />
-        <Layer {...MRT_LINE} />
+        <Layer {...MRT_LINE} beforeId={beforeId} />
       </Source>
       <Source id="mrt-stations" type="geojson" data={MRT_STATIONS}>
         <Layer
           {...MRT_STATION_DOTS}
+          beforeId={beforeId}
           paint={{
             ...MRT_STATION_DOTS.paint,
             "circle-stroke-color": darkMode ? "#171717" : "#ffffff",
           }}
         />
-        {badgeImagesReady ? <Layer {...MRT_STATION_BADGES} /> : null}
+        {badgeImagesReady ? (
+          <Layer {...MRT_STATION_BADGES} beforeId={beforeId} />
+        ) : null}
         <Layer
           {...MRT_STATION_NAMES}
+          beforeId={beforeId}
           paint={{
             ...MRT_STATION_NAMES.paint,
             "text-color": darkMode ? "#fafafa" : "#000000",
